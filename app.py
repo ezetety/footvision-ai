@@ -333,15 +333,15 @@ def fetch_fixtures(l_id: int, key: str, season_year: str) -> List[Dict[str, Any]
 # ==========================================
 # 5. AFFICHAGE PRINCIPAL
 # ==========================================
-# Correction ici : Suppression du 'f' inutile devant les guillemets triples
-st.markdown(f"""
+# Utilisation de .format() pour éviter tout conflit d'accolades avec Python
+st.markdown("""
     <div class="header-card">
-        <h1 style="margin:0; font-size:1.8rem; color:#FFF;">📊 Centre d'Analyse — {selected_league} ({selected_season})</h1>
+        <h1 style="margin:0; font-size:1.8rem; color:#FFF;">📊 Centre d'Analyse — {0} ({1})</h1>
         <p style="margin:6px 0 0 0; color:#9CA3AF; font-size:0.9rem;">
-            Analyses probabilistes, Scores Exacts & Scénarios tactiques VisiFoot — <b>{selected_round}</b>
+            Analyses probabilistes, Scores Exacts & Scénarios tactiques VisiFoot — <b>{2}</b>
         </p>
     </div>
-""", unsafe_allow_html=True)
+""".format(selected_league, selected_season, selected_round), unsafe_allow_html=True)
 
 search_query = st.text_input(
     "🔍 Recherche globale (Équipe, Nation, Joueur, Coach)",
@@ -397,29 +397,32 @@ with tab1:
             match_date = match['fixture']['date'][:10]
             match_time = match['fixture']['date'][11:16]
             home_name = match['teams']['home']['name']
-            away_name = match['teams']['home']['name'] # Correction ici pour éviter l'inversion
+            away_name = match['teams']['away']['name']
             home_logo = match['teams']['home']['logo']
             away_logo = match['teams']['away']['logo']
 
-            st.markdown(f"""
+            st.markdown("""
             <div class="match-card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                    <span style="color:#9CA3AF; font-size:0.85rem;">📅 {match_date} à {match_time} UTC • <i>{selected_round} ({selected_season})</i></span>
-                    <span style="font-size:0.85rem; color:#FBBF24;">Confiance : <b>{data['confidence']}</b></span>
+                    <span style="color:#9CA3AF; font-size:0.85rem;">📅 {0} à {1} UTC • <i>{2} ({3})</i></span>
+                    <span style="font-size:0.85rem; color:#FBBF24;">Confiance : <b>{4}</b></span>
                 </div>
                 
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                     <div style="width:38%;">
                         <div style="display:flex; align-items:center; gap:10px;">
-                            <img src="{home_logo}" width="32">
-                            <span style="font-size:1.15rem; font-weight:700; color:#FFF;">{home_name}</span>
+                            <img src="{5}" width="32">
+                            <span style="font-size:1.15rem; font-weight:700; color:#FFF;">{6}</span>
                         </div>
                         <div style="font-size:0.78rem; color:#9CA3AF; margin-top:4px;">
-                            👔 Coach: <b>{data['home_manager']}</b> | ⭐ Clé: <b>{data['home_star']}</b>
+                            👔 Coach: <b>{7}</b> | ⭐ Clé: <b>{8}</b>
                         </div>
                     </div>
                     
                     <div style="text-align:center; width:24%;">
                         <div style="font-size:0.7rem; color:#9CA3AF; text-transform:uppercase;">Score Exact Estimé</div>
-                        <div style="font-size:1.4rem; font-weight:800; color:#10B981;">{data['exact_score']}</div>
-  
+                        <div style="font-size:1.4rem; font-weight:800; color:#10B981;">{9}</div>
+                    </div>
+
+                    <div style="width:38%; text-align:right;">
+                        <div style="display:flex; align-items:center;
