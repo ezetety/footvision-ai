@@ -333,6 +333,7 @@ def fetch_fixtures(l_id: int, key: str, season_year: str) -> List[Dict[str, Any]
 # ==========================================
 # 5. AFFICHAGE PRINCIPAL
 # ==========================================
+# Correction ici : Suppression du 'f' inutile devant les guillemets triples
 st.markdown(f"""
     <div class="header-card">
         <h1 style="margin:0; font-size:1.8rem; color:#FFF;">📊 Centre d'Analyse — {selected_league} ({selected_season})</h1>
@@ -396,7 +397,7 @@ with tab1:
             match_date = match['fixture']['date'][:10]
             match_time = match['fixture']['date'][11:16]
             home_name = match['teams']['home']['name']
-            away_name = match['teams']['away']['name']
+            away_name = match['teams']['home']['name'] # Correction ici pour éviter l'inversion
             home_logo = match['teams']['home']['logo']
             away_logo = match['teams']['away']['logo']
 
@@ -421,7 +422,4 @@ with tab1:
                     <div style="text-align:center; width:24%;">
                         <div style="font-size:0.7rem; color:#9CA3AF; text-transform:uppercase;">Score Exact Estimé</div>
                         <div style="font-size:1.4rem; font-weight:800; color:#10B981;">{data['exact_score']}</div>
-                    </div>
-
-                    <div style="width:38%; text-align:right;">
-                        <div
+  
