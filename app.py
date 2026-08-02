@@ -141,7 +141,6 @@ COMPETITIONS: Dict[str, int] = {
     "Ligue des Nations": 5
 }
 
-# Archives des scores marquants de la saison 2025/2026
 ARCHIVED_SCORES_2526: Dict[str, List[Dict[str, Any]]] = {
     "Premier League": [
         {"Date": "2026-04-26", "Match": "Manchester City vs Arsenal FC", "Score": "2 - 2", "Buteurs": "Haaland 18', De Bruyne 72' / Saka 34', Rice 88'"},
@@ -366,9 +365,9 @@ with tab1:
 
         if not fixtures_data:
             st.info(f"ℹ️ Aucun match trouvé sur l'API pour la saison {selected_season}. Mode simulation VisiFoot actif.")
-            # Génération alternative pour assurer l'affichage
-            dummy_home = ALL_TEAMS.get(selected_league, ["Équipe A"])[0]
-            dummy_away = ALL_TEAMS.get(selected_league, ["", "Équipe B"])[1]
+            teams_list = ALL_TEAMS.get(selected_league, ["Équipe A", "Équipe B"])
+            dummy_home = teams_list[0]
+            dummy_away = teams_list[1] if len(teams_list) > 1 else "Équipe B"
             data = generate_match_analytics(101, dummy_home, dummy_away)
             fixtures_data = [{
                 'fixture': {'id': 101, 'date': '2026-05-15T20:00:00'},
@@ -423,5 +422,6 @@ with tab1:
                         <div style="font-size:0.7rem; color:#9CA3AF; text-transform:uppercase;">Score Exact Estimé</div>
                         <div style="font-size:1.4rem; font-weight:800; color:#10B981;">{data['exact_score']}</div>
                     </div>
-                    
-   
+
+                    <div style="width:38%; text-align:right;">
+                        <div
