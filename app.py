@@ -62,44 +62,40 @@ COMPETITIONS = {
 league_choice = st.sidebar.selectbox("Sélectionner une compétition", list(COMPETITIONS.keys()))
 
 st.sidebar.markdown("---")
-# Fonction avec cache de 5 minutes pour limiter les appels API
-    @st.cache_data(ttl=300)
-    def get_fixtures(league_id):
-        url = "https://v3.football.api-sports.io/fixtures"
-        headers = {'x-apisports-key': api_key}
-        # On demande les 10 prochains matchs (next=10) pour la saison 2026
-        params = {
-            'league': league_id,
-            'season': '2026',
-            'next': '15'
-        }
-        response = requests.get(url, headers=headers, params=params)
-        return response.json()
+st.sidebar.caption("⚠️ **Notice :** Les estimations sont des probabilités statistiques à visée informative. Aucun résultat n'est garanti.")
+
+# 3. Fonction API globale (sans problème d'indentation)
+@st.cache_data(ttl=300)
+def get_fixtures(league_id, api_key):
+    url = "https://v3.football.api-sports.io/fixtures"
+    headers = {'x-apisports-key': api_key}
+    params = {
+        'league': league_id,
+        'season': '2026',
+        'next': '15'
+    }
+    response = requests.get(url, headers=headers, params=params)
+    return response.json()
+
+# 4. Contenu principal
+st.title(f"⚽ {league_choice} — Saison 2026/2027")
+
+api_key = st.secrets.get("FOOTBALL_API_KEY", None)
 
 if not api_key:
     st.warning("⚠️ La clé `FOOTBALL_API_KEY` n'est pas encore détectée dans vos Secrets Streamlit Cloud.")
 else:
-    # Fonction avec cache de 5 minutes pour limiter les appels API
-    @st.cache_data(ttl=300)
-    def get_fixtures(league_id):
-        url = "https://v3.football.api-sports.io/fixtures"
-        headers = {'x-apisports-key': api_key}
-        params = {'league': league_id, 'season': '2026'}
-        response = requests.get(url, headers=headers, params=params)
-        return response.json()
-
-    with st.spinner("Chargement des matchs en direct depuis l'API..."):
+    with st.spinner("Chargement des prochains matchs..."):
         try:
-            data = get_fixtures(COMPETITIONS[league_choice])
+            data = get_fixtures(COMPETITIONS[league_choice], api_key)
             matches = data.get("response", [])
             
             if not matches:
-                st.info("Aucun match trouvé pour cette compétition actuellement.")
+                st.info("Aucun match à venir trouvé pour cette compétition actuellement.")
             else:
-                st.success(f"{len(matches)} matchs récupérés pour la saison 2026/2027 !")
+                st.success(f"{len(matches)} prochains matchs récupérés pour la saison 2026/2027 !")
                 
-                # Affichage des matchs
-                for match in matches[:25]: # Affiche les 25 premiers matchs
+                for match in matches:
                     home = match['teams']['home']['name']
                     away = match['teams']['away']['name']
                     status = match['fixture']['status']['long']
@@ -120,6 +116,6 @@ else:
 
 st.markdown("""
     <div class="disclaimer">
-        <b>Mention Obligatoire :</b> Ces données proviennent directement des flux officiels de la saison 2026/2027. Les analyses et probabilités IA associées sont fournies à titre strictement informatif.
+        <b>Mention Obligatoire :</b> Ces données proviennent directement des flux officiels de la saison 2026/2027. Les analyses et probabilités IA associées sont fournies à titre strictly informatif.
     </div>
 """, unsafe_allow_html=True)
