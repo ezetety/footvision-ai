@@ -62,13 +62,19 @@ COMPETITIONS = {
 league_choice = st.sidebar.selectbox("Sélectionner une compétition", list(COMPETITIONS.keys()))
 
 st.sidebar.markdown("---")
-st.sidebar.caption("⚠️ **Notice :** Les estimations sont des probabilités statistiques à visée informative. Aucun résultat n'est garanti.")
-
-# 3. Contenu principal
-st.title(f"⚽ {league_choice} — Saison 2026/2027")
-
-# Récupération de la clé API depuis les Secrets
-api_key = st.secrets.get("FOOTBALL_API_KEY", None)
+# Fonction avec cache de 5 minutes pour limiter les appels API
+    @st.cache_data(ttl=300)
+    def get_fixtures(league_id):
+        url = "https://v3.football.api-sports.io/fixtures"
+        headers = {'x-apisports-key': api_key}
+        # On demande les 10 prochains matchs (next=10) pour la saison 2026
+        params = {
+            'league': league_id,
+            'season': '2026',
+            'next': '15'
+        }
+        response = requests.get(url, headers=headers, params=params)
+        return response.json()
 
 if not api_key:
     st.warning("⚠️ La clé `FOOTBALL_API_KEY` n'est pas encore détectée dans vos Secrets Streamlit Cloud.")
