@@ -415,6 +415,4 @@ with tab5:
     st.subheader(f"📋 Équipes & Nations Engagées ({selected_league})")
     teams = ALL_TEAMS.get(selected_league, [])
     if search_query:
-        teams = [
-            t for t in teams 
-            
+        teams = [t for t in teams if search_query.lower() in
