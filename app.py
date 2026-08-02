@@ -28,47 +28,6 @@ st.markdown("""
         border-bottom: 3px solid #10B981;
         margin-bottom: 20px;
     }
-    .match-card {
-        background-color: #111827;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 20px;
-        border: 1px solid #1F2937;
-    }
-    .scenario-box {
-        background-color: #182232;
-        border-left: 4px solid #3B82F6;
-        padding: 14px 18px;
-        border-radius: 6px;
-        margin: 14px 0;
-        font-size: 0.92rem;
-        line-height: 1.5;
-        color: #E2E8F0;
-    }
-    .tip-pill {
-        background-color: #064E3B;
-        border: 1px solid #10B981;
-        color: #34D399;
-        font-weight: 700;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 0.88rem;
-        display: inline-block;
-    }
-    .metric-badge {
-        background-color: #1F2937;
-        border: 1px solid #374151;
-        border-radius: 8px;
-        padding: 10px;
-        text-align: center;
-    }
-    .metric-title {
-        color: #9CA3AF;
-        font-size: 0.72rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 4px;
-    }
     .disclaimer-box {
         background-color: #18181B;
         border-left: 4px solid #EF4444;
@@ -333,15 +292,10 @@ def fetch_fixtures(l_id: int, key: str, season_year: str) -> List[Dict[str, Any]
 # ==========================================
 # 5. AFFICHAGE PRINCIPAL
 # ==========================================
-# Utilisation de .format() pour éviter tout conflit d'accolades avec Python
-st.markdown("""
-    <div class="header-card">
-        <h1 style="margin:0; font-size:1.8rem; color:#FFF;">📊 Centre d'Analyse — {0} ({1})</h1>
-        <p style="margin:6px 0 0 0; color:#9CA3AF; font-size:0.9rem;">
-            Analyses probabilistes, Scores Exacts & Scénarios tactiques VisiFoot — <b>{2}</b>
-        </p>
-    </div>
-""".format(selected_league, selected_season, selected_round), unsafe_allow_html=True)
+
+st.markdown(f"### 📊 Centre d'Analyse — {selected_league} ({selected_season})")
+st.caption(f"Analyses probabilistes, Scores Exacts & Scénarios tactiques VisiFoot — **{selected_round}**")
+st.markdown("---")
 
 search_query = st.text_input(
     "🔍 Recherche globale (Équipe, Nation, Joueur, Coach)",
@@ -398,31 +352,67 @@ with tab1:
             match_time = match['fixture']['date'][11:16]
             home_name = match['teams']['home']['name']
             away_name = match['teams']['away']['name']
-            home_logo = match['teams']['home']['logo']
-            away_logo = match['teams']['away']['logo']
 
-            st.markdown("""
-            <div class="match-card">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                    <span style="color:#9CA3AF; font-size:0.85rem;">📅 {0} à {1} UTC • <i>{2} ({3})</i></span>
-                    <span style="font-size:0.85rem; color:#FBBF24;">Confiance : <b>{4}</b></span>
-                </div>
+            with st.container():
+                st.markdown(f"📅 **{match_date} à {match_time} UTC** • *{selected_round} ({selected_season})* — Confiance : **{data['confidence']}**")
                 
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <div style="width:38%;">
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <img src="{5}" width="32">
-                            <span style="font-size:1.15rem; font-weight:700; color:#FFF;">{6}</span>
-                        </div>
-                        <div style="font-size:0.78rem; color:#9CA3AF; margin-top:4px;">
-                            👔 Coach: <b>{7}</b> | ⭐ Clé: <b>{8}</b>
-                        </div>
-                    </div>
-                    
-                    <div style="text-align:center; width:24%;">
-                        <div style="font-size:0.7rem; color:#9CA3AF; text-transform:uppercase;">Score Exact Estimé</div>
-                        <div style="font-size:1.4rem; font-weight:800; color:#10B981;">{9}</div>
-                    </div>
+                col_h, col_m, col_a = st.columns([4, 2, 4])
+                with col_h:
+                    st.markdown(f"### 🏠 {home_name}")
+                    st.caption(f"Coach: **{data['home_manager']}** | Clé: **{data['home_star']}**")
+                with col_m:
+                    st.markdown("<div style='text-align: center;'>Score Estimé</div>", unsafe_allow_html=True)
+                    st.markdown(f"<h3 style='text-align: center; color: #10B981;'>{data['exact_score']}</h3>", unsafe_allow_html=True)
+                with col_a:
+                    st.markdown(f"### ✈️ {away_name}")
+                    st.caption(f"Coach: **{data['away_manager']}** | Clé: **{data['away_star']}**")
 
-                    <div style="width:38%; text-align:right;">
-                        <div style="display:flex; align-items:center;
+                st.info(f"💡 **Conseil Principal : {data['main_tip']}**")
+                st.markdown(f"> {data['scenario']}")
+
+                m1, m2, m3, m4, m5 = st.columns(5)
+                m1.metric("Victoire 1", f"{data['p_1']}%")
+                m2.metric("Nul (N)", f"{data['p_x']}%")
+                m3.metric("Victoire 2", f"{data['p_2']}%")
+                m4.metric("xG Domicile", data['xg_home'])
+                m5.metric("xG Extérieur", data['xg_away'])
+                st.markdown("---")
+
+# TAB 2 : SCORES ARCHIVÉS
+with tab2:
+    st.subheader(f"📜 Historique & Scores Remarquables 2025/2026 — {selected_league}")
+    archives = ARCHIVED_SCORES_2526.get(selected_league, [])
+    if archives:
+        for arch in archives:
+            with st.container():
+                st.markdown(f"📅 **{arch['Date']}** — Score : **{arch['Score']}**")
+                st.markdown(f"**{arch['Match']}**")
+                st.caption(f"⚽ Buteurs : {arch['Buteurs']}")
+                st.markdown("---")
+    else:
+        st.info("Aucun score archivé spécifique pour cette compétition.")
+
+# TAB 3 : CLASSEMENT
+with tab3:
+    st.subheader(f"🏆 Classement Simulé — {selected_league} ({selected_season})")
+    standings = generate_standings(selected_league, selected_season)
+    st.dataframe(standings, use_container_width=True, hide_index=True)
+
+# TAB 4 : STATISTIQUES INDIVIDUELLES
+with tab4:
+    st.subheader(f"🌟 Meilleures Performances — {selected_season}")
+    scorers, assists = generate_top_stats(selected_league, selected_season)
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("### ⚽ Meilleurs Buteurs")
+        st.dataframe(scorers, use_container_width=True, hide_index=True)
+    with c2:
+        st.markdown("### 🅰️ Meilleurs Passeurs")
+        st.dataframe(assists, use_container_width=True, hide_index=True)
+
+# TAB 5 : ÉQUIPES ENGAGÉES
+with tab5:
+    st.subheader(f"📋 Équipes & Nations Engagées ({selected_league})")
+    teams = ALL_TEAMS.get(selected_league, [])
+    if search_query:
+        teams = [t for t in teams if search_query.lower() in
